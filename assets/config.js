@@ -1,23 +1,25 @@
-// Add published HTTPS URLs here. Leave a value blank to keep that download disabled.
+// Use the published release page for browser and GitHub links.
 const MYLIMITS_CONFIG = Object.freeze({
-  stores: {
-    chrome: '',
-    edge: '',
-    firefox: '',
-  },
-  downloads: {
-    beta: '',
-  },
+  github: 'https://github.com/voiddev011/mylimits',
+  release: 'https://github.com/voiddev011/mylimits/releases/tag/v3.4.0',
 });
 
-for (const link of document.querySelectorAll('[data-store], [data-download]')) {
-  const isStore = Boolean(link.dataset.store);
-  const url = isStore
-    ? MYLIMITS_CONFIG.stores[link.dataset.store]
-    : MYLIMITS_CONFIG.downloads[link.dataset.download];
-  if (url && URL.canParse(url) && new URL(url).protocol === 'https:') {
-    link.href = url;
-    link.removeAttribute('aria-disabled');
-    link.querySelector('small').textContent = isStore ? 'Install extension ↗' : 'Download ZIP';
-  }
+const githubStarTarget = document.querySelector('[data-github-stars]');
+if (githubStarTarget) {
+  fetch('https://api.github.com/repos/voiddev011/mylimits')
+    .then((response) => (response.ok ? response.json() : null))
+    .then((data) => {
+      if (!data || typeof data.stargazers_count !== 'number') return;
+      const value = data.stargazers_count >= 1000
+        ? `${(data.stargazers_count / 1000).toFixed(1)}k`
+        : String(data.stargazers_count);
+      githubStarTarget.textContent = `★ ${value}`;
+    })
+    .catch(() => {
+      githubStarTarget.textContent = '★';
+    });
+}
+
+for (const link of document.querySelectorAll('[data-release-link]')) {
+  link.href = MYLIMITS_CONFIG.release;
 }
